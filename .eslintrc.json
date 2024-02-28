@@ -1,0 +1,8 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:prettier/recommended",
+    "@vercel/style-guide/eslint/playwright-test"
+  ],
+  "plugins": ["prettier"]
+}
