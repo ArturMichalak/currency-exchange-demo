@@ -24,7 +24,7 @@ export default function ExchangeSide({
     <div>
       {children}
       <div>
-        <Select defaultValue={defaultCurrency} onChange={onSelectChange}>
+        <Select size="small" defaultValue={defaultCurrency} onChange={onSelectChange}>
           {codes.map((code) => (
             <MenuItem key={code} value={code}>
               {code}
@@ -32,7 +32,7 @@ export default function ExchangeSide({
           ))}
         </Select>
 
-        <TextField value={amount} type="number" onChange={onInputChange} />
+        <TextField size="small" type="number" value={amount} onChange={onInputChange} />
       </div>
     </div>
   );

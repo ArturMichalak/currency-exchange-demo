@@ -2,7 +2,7 @@
 
 import { Card, Error, Loading } from '@/components';
 import { useExchange, useFetch } from '@/hooks';
-import { getCountryCodes, type ExchangeApiResult } from '@/utils';
+import { getCountryCodes, getCurrencyRate, type ExchangeApiResult, toFixedNumber } from '@/utils';
 import { type SelectChangeEvent } from '@mui/material/Select';
 import { ChangeEventHandler, useEffect, useMemo } from 'react';
 import ExchangeSide from './exchange-side';
@@ -13,63 +13,37 @@ interface CurrencyConverterProps {
   fetchUrl: string;
 }
 
-const defaultCurrency = 'USD';
-const defaultConvertedCurrency = 'PLN';
+const defaultFromCurrency = 'USD';
+const defaultToCurrency = 'PLN';
 
-export default function CurrencyConverter({
-  fetchUrl,
-}: CurrencyConverterProps) {
+export default function CurrencyConverter({ fetchUrl }: CurrencyConverterProps) {
   const { data, error, loading } = useFetch<ExchangeApiResult>(fetchUrl);
-  const {
-    changeCurrency,
-    exchangeCurrency,
-    amount,
-    convertedAmount,
-    fromCurrencyValue,
-    toCurrencyValue,
-  } = useExchange();
+  const { changeCurrency, exchangeCurrency, fromAmount, fromRate, toAmount, toRate } = useExchange();
 
-  const countryCodes = useMemo(
-    () => data && getCountryCodes(data.rates),
-    [data],
-  );
+  const countryCodes = useMemo(() => (data && getCountryCodes(data.rates)) || [], [data]);
 
   useEffect(() => {
     if (!data) return;
-    changeCurrency(data.rates[defaultCurrency], true);
-    changeCurrency(data.rates[defaultConvertedCurrency], false);
+    changeCurrency(data.rates[defaultFromCurrency], true);
+    changeCurrency(data.rates[defaultToCurrency], false);
   }, [data]);
 
-  function onFromChange(event: SelectChangeEvent) {
+  function handleRateChange(event: SelectChangeEvent, isBase: boolean) {
     if (data === null) return;
-    const countryCode =
-      countryCodes?.find((x) => x === event.target.value) || defaultCurrency;
-    const value = data.rates[countryCode];
-    changeCurrency(value, true);
-    exchangeCurrency((amount / value) * toCurrencyValue, false);
+    const rate = getCurrencyRate(data.rates, countryCodes, event.target.value, defaultFromCurrency);
+
+    changeCurrency(rate, isBase);
+    const [amount, dstRate] = isBase ? [fromAmount, toRate] : [toAmount, fromRate];
+    exchangeCurrency((amount / rate) * dstRate, !isBase);
   }
 
-  function onToChange(event: SelectChangeEvent) {
+  function handleAmountChange(event: InputEvent, isBase: boolean) {
     if (data === null) return;
-    const countryCode =
-      countryCodes?.find((x) => x === event.target.value) || defaultCurrency;
-    const value = data.rates[countryCode];
-    changeCurrency(value, false);
-    exchangeCurrency((convertedAmount / value) * fromCurrencyValue, true);
-  }
-
-  function onAmountChange(event: InputEvent) {
-    if (data === null) return;
-    const value = parseInt(event.target.value);
-    exchangeCurrency(value, true);
-    exchangeCurrency((value / fromCurrencyValue) * toCurrencyValue, false);
-  }
-
-  function onConvertedAmountChange(event: InputEvent) {
-    if (data === null) return;
-    const value = parseInt(event.target.value);
-    exchangeCurrency(value, false);
-    exchangeCurrency((value / toCurrencyValue) * fromCurrencyValue, true);
+    const value = toFixedNumber(parseFloat(event.target.value));
+    if (isNaN(value) || value < 0) return;
+    exchangeCurrency(value, isBase);
+    const [rate, dstRate] = isBase ? [fromRate, toRate] : [toRate, fromRate];
+    exchangeCurrency(toFixedNumber(value / rate * dstRate), !isBase);
   }
 
   if (loading || data === null) return <Loading />;
@@ -77,19 +51,19 @@ export default function CurrencyConverter({
   return (
     <Card>
       <ExchangeSide
-        onSelectChange={onFromChange}
-        onInputChange={onAmountChange}
-        defaultCurrency={defaultCurrency}
-        amount={amount}
+        onSelectChange={(e) => handleRateChange(e, true)}
+        onInputChange={(e) => handleAmountChange(e, true)}
+        defaultCurrency={defaultFromCurrency}
+        amount={fromAmount}
         codes={countryCodes!}
       >
         Amount
       </ExchangeSide>
       <ExchangeSide
-        onSelectChange={onToChange}
-        onInputChange={onConvertedAmountChange}
-        defaultCurrency={defaultConvertedCurrency}
-        amount={convertedAmount}
+        onSelectChange={(e) => handleRateChange(e, false)}
+        onInputChange={(e) => handleAmountChange(e, false)}
+        defaultCurrency={defaultToCurrency}
+        amount={toAmount}
         codes={countryCodes!}
       >
         Converted Amount

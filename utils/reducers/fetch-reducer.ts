@@ -15,10 +15,7 @@ type Action<T> =
   | { type: Actions.FETCH_SUCCESS; payload: T }
   | { type: Actions.FETCH_FAILURE; payload: Error };
 
-export default function fetchReducer<T>(
-  state: State<T>,
-  action: Action<T>,
-): State<T> {
+export default function fetchReducer<T>(state: State<T>, action: Action<T>): State<T> {
   switch (action.type) {
     case Actions.FETCH_INIT:
       return {
