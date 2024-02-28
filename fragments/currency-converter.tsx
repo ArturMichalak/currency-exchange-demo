@@ -3,10 +3,8 @@
 import { Card, Error } from '@/components';
 import { useExchange, useFetch } from '@/hooks';
 import { getCountryCodes, type ExchangeApiResult } from '@/utils';
-import { MenuItem } from '@mui/material';
-import Select, { type SelectChangeEvent } from '@mui/material/Select';
-import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import { ChangeEventHandler, useMemo, useReducer } from 'react';
+import { type SelectChangeEvent } from '@mui/material/Select';
+import { ChangeEventHandler, useEffect, useMemo, useState } from 'react';
 import ExchangeSide from './exchange-side';
 
 interface CurrencyConverterProps {
@@ -17,12 +15,18 @@ export default function CurrencyConverter({
   fetchUrl,
 }: CurrencyConverterProps) {
   const { data, error, loading } = useFetch<ExchangeApiResult>(fetchUrl);
-  const { changeCurrency, exchangeCurrency, ...rest } = useExchange();
+  const { changeCurrency, exchangeCurrency, amount, convertedAmount, fromCurrencyValue, toCurrencyValue } = useExchange();
 
   const countryCodes = useMemo(
     () => data && getCountryCodes(data.rates),
     [data],
   );
+
+  useEffect(() => {
+    if (!data) return;
+    changeCurrency(data.rates['USD'], true);
+    changeCurrency(data.rates['PLN'], false)
+  }, [data])
 
   function onFromChange(event: SelectChangeEvent) {
     if (data === null) return;
@@ -41,7 +45,12 @@ export default function CurrencyConverter({
   ) {
     if (data === null) return;
     const value = parseInt(event.target.value);
-    changeCurrency(value, true);
+    
+    exchangeCurrency(value, true);
+    exchangeCurrency(
+      (value / fromCurrencyValue) * toCurrencyValue,
+      false,
+    );
   }
 
   function onConvertedAmountChange(
@@ -49,7 +58,11 @@ export default function CurrencyConverter({
   ) {
     if (data === null) return;
     const value = parseInt(event.target.value);
-    changeCurrency(value, false);
+    exchangeCurrency(value, false);
+    exchangeCurrency(
+      (value / toCurrencyValue) * fromCurrencyValue,
+      true,
+    );
   }
 
   if (loading || data === null) return 'Loading...';
@@ -59,7 +72,8 @@ export default function CurrencyConverter({
       <ExchangeSide
         onSelectChange={onFromChange}
         onInputChange={onAmountChange}
-        defaults={{ input: 0, select: 'USD' }}
+        defaultCurrency='USD'
+        amount={amount}
         codes={countryCodes!}
       >
         Amount
@@ -67,7 +81,8 @@ export default function CurrencyConverter({
       <ExchangeSide
         onSelectChange={onToChange}
         onInputChange={onConvertedAmountChange}
-        defaults={{ input: 0, select: 'PLN' }}
+        defaultCurrency='PLN'
+        amount={convertedAmount}
         codes={countryCodes!}
       >
         Converted Amount
