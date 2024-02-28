@@ -24,7 +24,7 @@ export default function ExchangeSide({
     <div>
       {children}
       <div>
-        <Select value={defaultCurrency} onChange={onSelectChange}>
+        <Select defaultValue={defaultCurrency} onChange={onSelectChange}>
           {codes.map((code) => (
             <MenuItem key={code} value={code}>
               {code}

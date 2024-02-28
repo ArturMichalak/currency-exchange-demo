@@ -19,9 +19,9 @@ export default function useExchange() {
 
   function exchangeCurrency(amount: number, fromBase: boolean) {
     if (fromBase) {
-      dispatch({ type: CurrencyActions.SET_AMOUNT, payload: amount });
+      dispatch({ type: CurrencyActions.SET_AMOUNT, payload: +amount.toFixed(2) });
     } else {
-      dispatch({ type: CurrencyActions.SET_CONVERTED_AMOUNT, payload: amount });
+      dispatch({ type: CurrencyActions.SET_CONVERTED_AMOUNT, payload: +amount.toFixed(2) });
     }
   }
 
