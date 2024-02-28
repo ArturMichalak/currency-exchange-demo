@@ -1,11 +1,13 @@
 'use client';
 
-import { Card, Error } from '@/components';
+import { Card, Error, Loading } from '@/components';
 import { useExchange, useFetch } from '@/hooks';
 import { getCountryCodes, type ExchangeApiResult } from '@/utils';
 import { type SelectChangeEvent } from '@mui/material/Select';
 import { ChangeEventHandler, useEffect, useMemo } from 'react';
 import ExchangeSide from './exchange-side';
+
+type InputEvent = Parameters<ChangeEventHandler<HTMLInputElement>>[0];
 
 interface CurrencyConverterProps {
   fetchUrl: string;
@@ -37,38 +39,35 @@ export default function CurrencyConverter({
 
   function onFromChange(event: SelectChangeEvent) {
     if (data === null) return;
-    const value = data.rates[event.target.value];
+    const countryCode = countryCodes?.find(x => x === event.target.value) || 'USD';
+    const value = data.rates[countryCode];
     changeCurrency(value, true);
     exchangeCurrency((amount / value) * toCurrencyValue, false);
   }
 
   function onToChange(event: SelectChangeEvent) {
     if (data === null) return;
-    const value = data.rates[event.target.value];
+    const countryCode = countryCodes?.find(x => x === event.target.value) || 'USD';
+    const value = data.rates[countryCode];
     changeCurrency(value, false);
     exchangeCurrency((convertedAmount / value) * fromCurrencyValue, true);
   }
 
-  function onAmountChange(
-    event: Parameters<ChangeEventHandler<HTMLInputElement>>[0],
-  ) {
+  function onAmountChange(event: InputEvent) {
     if (data === null) return;
     const value = parseInt(event.target.value);
-
     exchangeCurrency(value, true);
     exchangeCurrency((value / fromCurrencyValue) * toCurrencyValue, false);
   }
 
-  function onConvertedAmountChange(
-    event: Parameters<ChangeEventHandler<HTMLInputElement>>['0'],
-  ) {
+  function onConvertedAmountChange(event: InputEvent) {
     if (data === null) return;
     const value = parseInt(event.target.value);
     exchangeCurrency(value, false);
     exchangeCurrency((value / toCurrencyValue) * fromCurrencyValue, true);
   }
 
-  if (loading || data === null) return 'Loading...';
+  if (loading || data === null) return <Loading />;
   if (error) return <Error errorMessage={error.message} />;
   return (
     <Card>
