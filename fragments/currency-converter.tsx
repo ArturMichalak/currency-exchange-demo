@@ -13,6 +13,9 @@ interface CurrencyConverterProps {
   fetchUrl: string;
 }
 
+const defaultCurrency = 'USD';
+const defaultConvertedCurrency = 'PLN';
+
 export default function CurrencyConverter({
   fetchUrl,
 }: CurrencyConverterProps) {
@@ -33,13 +36,14 @@ export default function CurrencyConverter({
 
   useEffect(() => {
     if (!data) return;
-    changeCurrency(data.rates['USD'], true);
-    changeCurrency(data.rates['PLN'], false);
+    changeCurrency(data.rates[defaultCurrency], true);
+    changeCurrency(data.rates[defaultConvertedCurrency], false);
   }, [data]);
 
   function onFromChange(event: SelectChangeEvent) {
     if (data === null) return;
-    const countryCode = countryCodes?.find(x => x === event.target.value) || 'USD';
+    const countryCode =
+      countryCodes?.find((x) => x === event.target.value) || defaultCurrency;
     const value = data.rates[countryCode];
     changeCurrency(value, true);
     exchangeCurrency((amount / value) * toCurrencyValue, false);
@@ -47,7 +51,8 @@ export default function CurrencyConverter({
 
   function onToChange(event: SelectChangeEvent) {
     if (data === null) return;
-    const countryCode = countryCodes?.find(x => x === event.target.value) || 'USD';
+    const countryCode =
+      countryCodes?.find((x) => x === event.target.value) || defaultCurrency;
     const value = data.rates[countryCode];
     changeCurrency(value, false);
     exchangeCurrency((convertedAmount / value) * fromCurrencyValue, true);
@@ -74,7 +79,7 @@ export default function CurrencyConverter({
       <ExchangeSide
         onSelectChange={onFromChange}
         onInputChange={onAmountChange}
-        defaultCurrency="USD"
+        defaultCurrency={defaultCurrency}
         amount={amount}
         codes={countryCodes!}
       >
@@ -83,7 +88,7 @@ export default function CurrencyConverter({
       <ExchangeSide
         onSelectChange={onToChange}
         onInputChange={onConvertedAmountChange}
-        defaultCurrency="PLN"
+        defaultCurrency={defaultConvertedCurrency}
         amount={convertedAmount}
         codes={countryCodes!}
       >
