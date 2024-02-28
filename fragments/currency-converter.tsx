@@ -7,6 +7,7 @@ import { MenuItem } from '@mui/material';
 import Select, { type SelectChangeEvent } from '@mui/material/Select';
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
 import { ChangeEventHandler, useMemo, useReducer } from 'react';
+import ExchangeSide from './exchange-side';
 
 interface CurrencyConverterProps {
   fetchUrl: string;
@@ -55,37 +56,22 @@ export default function CurrencyConverter({
   if (error) return <Error errorMessage={error.message} />;
   return (
     <Card>
-      <div>
+      <ExchangeSide
+        onSelectChange={onFromChange}
+        onInputChange={onAmountChange}
+        defaults={{ input: 0, select: 'USD' }}
+        codes={countryCodes!}
+      >
         Amount
-        <div>
-          <Select defaultValue="USD" onChange={onFromChange}>
-            {countryCodes!.map((code) => (
-              <MenuItem key={code} value={code}>
-                {code}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <TextField defaultValue={0} type="number" onChange={onAmountChange} />
-        </div>
-      </div>
-      <div>
+      </ExchangeSide>
+      <ExchangeSide
+        onSelectChange={onToChange}
+        onInputChange={onConvertedAmountChange}
+        defaults={{ input: 0, select: 'PLN' }}
+        codes={countryCodes!}
+      >
         Converted Amount
-        <div>
-          <Select defaultValue="PLN" onChange={onToChange}>
-            {countryCodes!.map((code) => (
-              <MenuItem key={code} value={code}>
-                {code}
-              </MenuItem>
-            ))}
-          </Select>
-          <TextField
-            defaultValue={0}
-            type="number"
-            onChange={onConvertedAmountChange}
-          />
-        </div>
-      </div>
+      </ExchangeSide>
     </Card>
   );
 }
