@@ -2,7 +2,7 @@
 
 import { Card, Error, Loading } from '@/components';
 import { useExchange, useFetch } from '@/hooks';
-import { getCountryCodes, getCurrencyRate, type ExchangeApiResult, toFixedNumber } from '@/utils';
+import { getCountryCodes, getCurrencyRate, toFixedNumber, type ExchangeApiResult } from '@/utils';
 import { type SelectChangeEvent } from '@mui/material/Select';
 import { ChangeEventHandler, useEffect, useMemo } from 'react';
 import ExchangeSide from './exchange-side';
@@ -43,7 +43,7 @@ export default function CurrencyConverter({ fetchUrl }: CurrencyConverterProps) 
     if (isNaN(value) || value < 0) return;
     exchangeCurrency(value, isBase);
     const [rate, dstRate] = isBase ? [fromRate, toRate] : [toRate, fromRate];
-    exchangeCurrency(toFixedNumber(value / rate * dstRate), !isBase);
+    exchangeCurrency(toFixedNumber((value / rate) * dstRate), !isBase);
   }
 
   if (loading || data === null) return <Loading />;

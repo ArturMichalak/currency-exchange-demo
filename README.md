@@ -53,6 +53,16 @@ Run `pnpm build` and `pnpm start`, then run `npx playwright test` in another ter
 
 Check [NextJS Docs](https://nextjs.org/docs/pages/building-your-application/testing/playwright#running-your-playwright-tests) for more information.
 
-To update snapshots use `--update-snapshots` argument in the `npx` command.
+To update snapshots use a `--update-snapshots` argument in the `npx` command.
 
-`npx playwright test --update-snapshots`
+```bash
+npx playwright test --update-snapshots
+```
+
+#### Mutation testing
+
+[stryker mutator](https://stryker-mutator.io/docs/stryker-js/getting-started/)
+
+```bash
+npx stryker run
+```
