@@ -58,11 +58,3 @@ To update snapshots use a `--update-snapshots` argument in the `npx` command.
 ```bash
 npx playwright test --update-snapshots
 ```
-
-#### Mutation testing
-
-[stryker mutator](https://stryker-mutator.io/docs/stryker-js/getting-started/)
-
-```bash
-npx stryker run
-```
