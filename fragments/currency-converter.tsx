@@ -2,9 +2,9 @@
 
 import { Card, Error, Loading } from '@/components';
 import { useExchange, useFetch } from '@/hooks';
-import { getCountryCodes, getCurrencyRate, type ExchangeApiResult, toFixedNumber } from '@/utils';
+import { getCountryCodes, getCurrencyRate, toFixedNumber, type ExchangeApiResult } from '@/utils';
 import { type SelectChangeEvent } from '@mui/material/Select';
-import { ChangeEventHandler, useEffect, useMemo } from 'react';
+import { ChangeEventHandler, useCallback, useEffect, useMemo } from 'react';
 import ExchangeSide from './exchange-side';
 
 type InputEvent = Parameters<ChangeEventHandler<HTMLInputElement>>[0];
@@ -26,25 +26,31 @@ export default function CurrencyConverter({ fetchUrl }: CurrencyConverterProps) 
     if (!data) return;
     changeCurrency(data.rates[defaultFromCurrency], true);
     changeCurrency(data.rates[defaultToCurrency], false);
-  }, [data]);
+  }, [changeCurrency, data]);
 
-  function handleRateChange(event: SelectChangeEvent, isBase: boolean) {
-    if (data === null) return;
-    const rate = getCurrencyRate(data.rates, countryCodes, event.target.value, defaultFromCurrency);
+  const handleRateChange = useCallback(
+    (event: SelectChangeEvent, isBase: boolean) => {
+      if (data === null) return;
+      const rate = getCurrencyRate(data.rates, countryCodes, event.target.value, defaultFromCurrency);
 
-    changeCurrency(rate, isBase);
-    const [amount, dstRate] = isBase ? [fromAmount, toRate] : [toAmount, fromRate];
-    exchangeCurrency((amount / rate) * dstRate, !isBase);
-  }
+      changeCurrency(rate, isBase);
+      const [amount, dstRate] = isBase ? [fromAmount, toRate] : [toAmount, fromRate];
+      exchangeCurrency((amount / rate) * dstRate, !isBase);
+    },
+    [changeCurrency, countryCodes, data, exchangeCurrency, fromAmount, fromRate, toAmount, toRate],
+  );
 
-  function handleAmountChange(event: InputEvent, isBase: boolean) {
-    if (data === null) return;
-    const value = toFixedNumber(parseFloat(event.target.value));
-    if (isNaN(value) || value < 0) return;
-    exchangeCurrency(value, isBase);
-    const [rate, dstRate] = isBase ? [fromRate, toRate] : [toRate, fromRate];
-    exchangeCurrency(toFixedNumber(value / rate * dstRate), !isBase);
-  }
+  const handleAmountChange = useCallback(
+    (event: InputEvent, isBase: boolean) => {
+      if (data === null) return;
+      const value = toFixedNumber(parseFloat(event.target.value));
+      if (isNaN(value) || value < 0) return;
+      exchangeCurrency(value, isBase);
+      const [rate, dstRate] = isBase ? [fromRate, toRate] : [toRate, fromRate];
+      exchangeCurrency(toFixedNumber((value / rate) * dstRate), !isBase);
+    },
+    [data, exchangeCurrency, fromRate, toRate],
+  );
 
   if (loading || data === null) return <Loading />;
   if (error) return <Error errorMessage={error.message} />;
