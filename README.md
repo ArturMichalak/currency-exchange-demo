@@ -16,20 +16,20 @@ A simple application that allows the user to convert between currencies.
 
 ## Getting Started
 
-First, set exchange api serwer url as an environment variable.
+First, set exchange api serwer url as the `API_URL` environment variable.
 
 ```bash
 # .env.local
 API_URL=https://api.exchangerate-api.com/v4/latest/USD
 ```
 
-First, install dependencies:
+Next, install dependencies.
 
 ```bash
 pnpm i
 ```
 
-Then run the development server:
+Then, run the development server:
 
 ```bash
 pnpm dev

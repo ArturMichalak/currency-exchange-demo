@@ -1,6 +1,5 @@
-import { ExchangeApiResult } from ".";
-
+import { ExchangeApiResult } from '.';
 
 export default function getCountryCodes(rates: ExchangeApiResult['rates']) {
-    return Object.keys(rates)
+  return Object.keys(rates);
 }
